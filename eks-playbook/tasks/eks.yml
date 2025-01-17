@@ -1,0 +1,11 @@
+- name: Create EKS Cluster
+  amazon.aws.eks_cluster:
+    name: "{{ cluster_name }}"
+    role_arn: "{{ eks_role.iam_role.arn }}"
+    version: "{{ eks_version }}"
+    resources_vpc_config:
+      subnet_ids: "{{ subnets.results | map(attribute='id') | list }}"
+      endpoint_public_access: true
+      endpoint_private_access: true
+    state: present
+    region: "{{ aws_region }}"

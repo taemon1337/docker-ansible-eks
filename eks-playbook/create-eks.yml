@@ -1,0 +1,10 @@
+- name: Provision EKS Cluster with Full AWS Resources
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars_files:
+    - vars.yml
+  tasks:
+    - include_tasks: tasks/vpc.yml
+    - include_tasks: tasks/iam.yml
+    - include_tasks: tasks/eks.yml

@@ -1,0 +1,41 @@
+- name: Create VPC
+  amazon.aws.ec2_vpc_net:
+    name: "vpc_{{ cluster_name }}"
+    cidr_block: "{{ vpc_cidr }}"
+    dns_hostnames: true
+    dns_support: true
+    state: present
+    region: "{{ aws_region }}"
+  register: vpc
+
+- name: Create Internet Gateway
+  amazon.aws.ec2_vpc_igw:
+    vpc_id: "{{ vpc.vpc.id }}"
+    state: present
+    region: "{{ aws_region }}"
+  register: igw
+
+- name: Create Subnets
+  amazon.aws.ec2_vpc_subnet:
+    vpc_id: "{{ vpc.vpc.id }}"
+    cidr: "{{ item.cidr }}"
+    az: "{{ item.az }}"
+    state: present
+    region: "{{ aws_region }}"
+    map_public: true
+  with_items: "{{ public_subnets + private_subnets }}"
+  register: subnets
+
+- name: Create Route Table for Public Subnets
+  amazon.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc.vpc.id }}"
+    state: present
+    region: "{{ aws_region }}"
+    tags:
+      Name: "{{ cluster_name }}"
+    subnets:
+      - "{{ subnets.results | selectattr('item.cidr', 'search', '10.0.1.0/24|10.0.2.0/24') | list | join(',') }}"
+    routes:
+      - destination_cidr_block: "0.0.0.0/0"
+        gateway_id: "{{ igw.internet_gateway.id }}"
+  register: route_table
