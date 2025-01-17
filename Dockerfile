@@ -12,8 +12,6 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 COPY ./requirements.* .
 
-RUN source /opt/venv/bin/activate
-
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN ansible-galaxy collection install -r requirements.yml
