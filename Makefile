@@ -14,8 +14,14 @@ ansible:
 		-v ~/.aws:/root/.aws \
 		-v $(PWD):$(PWD) -w $(PWD) $(IMAGE):$(TAG) ansible $(MAKEFLAGS)
 
-cluster:
+check:
 	docker run -it --rm \
 		-v ~/.ssh:/root/.ssh \
 		-v ~/.aws:/root/.aws \
 		-v $(PWD):$(PWD) -w $(PWD) $(IMAGE):$(TAG) ansible-playbook eks-playbook/create-eks.yml --diff --check
+
+cluster:
+	docker run -it --rm \
+		-v ~/.ssh:/root/.ssh \
+		-v ~/.aws:/root/.aws \
+		-v $(PWD):$(PWD) -w $(PWD) $(IMAGE):$(TAG) ansible-playbook eks-playbook/create-eks.yml
