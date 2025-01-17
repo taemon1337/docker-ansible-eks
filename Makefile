@@ -25,3 +25,9 @@ cluster:
 		-v ~/.ssh:/root/.ssh \
 		-v ~/.aws:/root/.aws \
 		-v $(PWD):$(PWD) -w $(PWD) $(IMAGE):$(TAG) ansible-playbook eks-playbook/create-eks.yml
+
+delete-cluster:
+	docker run -it --rm \
+		-v ~/.ssh:/root/.ssh \
+		-v ~/.aws:/root/.aws \
+		-v $(PWD):$(PWD) -w $(PWD) $(IMAGE):$(TAG) ansible-playbook eks-playbook/delete-eks.yml

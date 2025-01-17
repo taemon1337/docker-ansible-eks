@@ -1,7 +1,7 @@
 - name: Create IAM Role for EKS Cluster
   amazon.aws.iam_role:
     name: "{{ cluster_name }}-eks-role"
-    state: present
+    state: "present"
     managed_policies:
       - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
       - arn:aws:iam::aws:policy/AmazonEKSVPCResourceController
@@ -21,7 +21,7 @@
 - name: Create IAM Policy for EKS Cluster
   amazon.aws.iam_policy:
     policy_name: "{{ cluster_name }}-eks-policy"
-    state: present
+    state: "present"
     iam_type: "role"
     iam_name: "{{ eks_role.iam_role.role_name }}"
     policy_json: >

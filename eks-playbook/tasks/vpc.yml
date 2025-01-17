@@ -4,14 +4,14 @@
     cidr_block: "{{ vpc_cidr }}"
     dns_hostnames: true
     dns_support: true
-    state: present
+    state: "present"
     region: "{{ aws_region }}"
   register: vpc
 
 - name: Create Internet Gateway
   amazon.aws.ec2_vpc_igw:
     vpc_id: "{{ vpc.vpc.id }}"
-    state: present
+    state: "present"
     region: "{{ aws_region }}"
   register: igw
 
@@ -20,7 +20,7 @@
     vpc_id: "{{ vpc.vpc.id }}"
     cidr: "{{ item.cidr }}"
     az: "{{ item.az }}"
-    state: present
+    state: "present"
     region: "{{ aws_region }}"
     map_public: true
   with_items: "{{ public_subnets + private_subnets }}"
@@ -29,7 +29,7 @@
 - name: Create Route Table for Public Subnets
   amazon.aws.ec2_vpc_route_table:
     vpc_id: "{{ vpc.vpc.id }}"
-    state: present
+    state: "present"
     region: "{{ aws_region }}"
     tags:
       Name: "{{ cluster_name }}"
@@ -44,7 +44,7 @@
     name: "{{ cluster_name }}-eks-sg"
     description: "Security Group for {{ cluster_name }} EKS Cluster"
     vpc_id: "{{ vpc.vpc.id }}"
-    state: present
+    state: "present"
     rules:  
       - proto: tcp
         from_port: 80

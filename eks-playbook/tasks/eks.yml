@@ -1,7 +1,7 @@
 - name: Create EKS Cluster
   community.aws.eks_cluster:
     name: "{{ cluster_name }}"
-    state: present
+    state: "present"
     role_arn: "{{ eks_role.iam_role.arn }}"
     version: "{{ eks_version }}"
     subnets: "{{ subnets.results | map(attribute='subnet.id') | list }}"
@@ -9,6 +9,5 @@
       - "{{ security_group.group_id }}"
     region: "{{ aws_region }}"
     tags:
-      Name: "{{ cluster_name }}"
-    
+      Name: "{{ cluster_name }}"    
   register: eks_cluster
