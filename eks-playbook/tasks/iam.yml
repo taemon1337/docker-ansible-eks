@@ -2,6 +2,9 @@
   amazon.aws.iam_role:
     name: "{{ cluster_name }}-eks-role"
     state: present
+    managed_policies:
+      - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+      - arn:aws:iam::aws:policy/AmazonEKSVPCResourceController
     assume_role_policy_document: >
       {
         "Version": "2012-10-17",
@@ -15,10 +18,21 @@
       }
   register: eks_role
 
-- name: Attach Managed Policies to IAM Role
-  amazon.aws.iam_managed_policy:
-    role_name: "{{ eks_role.iam_role.name }}"
+- name: Create IAM Policy for EKS Cluster
+  amazon.aws.iam_policy:
+    policy_name: "{{ cluster_name }}-eks-policy"
     state: present
-    policy_arns:
-      - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
-      - arn:aws:iam::aws:policy/AmazonEKSVPCResourceController
+    iam_type: "role"
+    iam_name: "{{ eks_role.iam_role.role_name }}"
+    policy_json: >
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": "*",
+            "Resource": "*"
+          }
+        ]
+      }
+  register: eks_policy

@@ -33,9 +33,37 @@
     region: "{{ aws_region }}"
     tags:
       Name: "{{ cluster_name }}"
-    subnets:
-      - "{{ subnets.results | selectattr('item.cidr', 'search', '10.0.1.0/24|10.0.2.0/24') | list | join(',') }}"
+    subnets: "{{ subnets.results | map(attribute='subnet.id') | list }}"
     routes:
-      - destination_cidr_block: "0.0.0.0/0"
-        gateway_id: "{{ igw.internet_gateway.id }}"
+      - dest: "0.0.0.0/0"
+        gateway_id: "{{ igw.gateway_id }}"
   register: route_table
+
+- name: Create Security Group for EKS Cluster
+  amazon.aws.ec2_security_group:
+    name: "{{ cluster_name }}-eks-sg"
+    description: "Security Group for {{ cluster_name }} EKS Cluster"
+    vpc_id: "{{ vpc.vpc.id }}"
+    state: present
+    rules:  
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: "{{ vpc_cidr }}"
+        rule_desc: "Allow HTTP"
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: "{{ vpc_cidr }}"
+        rule_desc: "Allow SSH"
+      - proto: tcp
+        from_port: 443
+        to_port: 443
+        cidr_ip: "{{ vpc_cidr }}"
+        rule_desc: "Allow HTTPS"
+    rules_egress:
+      - proto: all
+        from_port: 0
+        to_port: 0
+        cidr_ip: 0.0.0.0/0
+  register: security_group
