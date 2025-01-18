@@ -12,3 +12,11 @@ private_subnets:
     az: us-east-1a
   - cidr: 10.0.4.0/24
     az: us-east-1b
+node_group_desired_size: 1
+node_group_min_size: 1
+node_group_max_size: 10
+node_group_disk_size: 50
+node_group_instance_types:
+  - "t2.micro"
+  - "t2.medium"
+node_group_ami_type: "AL2_x86_64"

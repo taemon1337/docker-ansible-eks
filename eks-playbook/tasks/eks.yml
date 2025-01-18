@@ -9,5 +9,26 @@
       - "{{ security_group.group_id }}"
     region: "{{ aws_region }}"
     tags:
-      Name: "{{ cluster_name }}"    
+      Name: "{{ cluster_name }}"
+  ignore_errors: "{{ ansible_check_mode }}"
   register: eks_cluster
+
+- name: Create EKS Node Group
+  community.aws.eks_nodegroup:
+    name: "{{ cluster_name }}-node-group"
+    cluster_name: "{{ cluster_name }}"
+    state: "present"
+    node_role: "{{ eks_role.iam_role.arn }}"
+    subnets: "{{ subnets.results | map(attribute='subnet.id') | list }}"
+    instance_types: "{{ node_group_instance_types }}"
+    ami_type: "{{ node_group_ami_type }}"
+    scaling_config:
+      desired_size: "{{ node_group_desired_size }}"
+      min_size: "{{ node_group_min_size }}"
+      max_size: "{{ node_group_max_size }}"
+    disk_size: "{{ node_group_disk_size }}"
+    tags:
+      Name: "{{ cluster_name }}"
+    labels: {}
+    taints: []
+  register: node_group

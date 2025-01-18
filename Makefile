@@ -18,7 +18,7 @@ check:
 	docker run -it --rm \
 		-v ~/.ssh:/root/.ssh \
 		-v ~/.aws:/root/.aws \
-		-v $(PWD):$(PWD) -w $(PWD) $(IMAGE):$(TAG) ansible-playbook eks-playbook/create-eks.yml --diff --check
+		-v $(PWD):$(PWD) -w $(PWD) $(IMAGE):$(TAG) ansible-playbook eks-playbook/create-eks.yml --extra-vars @eks-playbook/check-mode-vars.yml --diff --check
 
 cluster:
 	docker run -it --rm \

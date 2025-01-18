@@ -1,0 +1,27 @@
+# check-mode-vars.yml are only used in check mode to test the playbook
+
+vpc:
+  vpc:
+    id: "test-vpc-id"
+
+subnets:
+  results:
+    - subnet:
+        id: "test-subnet-1"
+    - subnet:
+        id: "test-subnet-2"
+
+igw:
+  gateway_id: "test-igw-id"
+
+security_group:
+  group_id: "test-sg-id"
+
+eks_role:
+  iam_role:
+    role_name: "test-eks-role"
+    arn: "test-eks-role-arn"
+
+eks_cluster:
+  cluster:
+    name: "{{ cluster_name }}"

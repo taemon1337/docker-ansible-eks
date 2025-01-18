@@ -43,6 +43,12 @@
         region: "{{ aws_region }}"
         map_public: true
       with_items: "{{ public_subnets + private_subnets }}"
+    - name: Delete EKS Node Group
+      community.aws.eks_node_group:
+        name: "{{ cluster_name }}-node-group"
+        cluster_name: "{{ cluster_name }}"
+        wait: true
+        state: "absent"
     - name: Delete EKS Cluster
       community.aws.eks_cluster:
         name: "{{ cluster_name }}"
