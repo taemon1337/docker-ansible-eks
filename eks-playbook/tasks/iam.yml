@@ -18,6 +18,27 @@
       }
   register: eks_role
 
+- name: Create IAM Role for EKS Cluster Nodes
+  amazon.aws.iam_role:
+    name: "{{ cluster_name }}-eks-nodes-role"
+    state: "present"
+    managed_policies:
+      - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+      - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+      - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+    assume_role_policy_document: >
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": { "Service": "eks.amazonaws.com" },
+            "Action": "sts:AssumeRole"
+          }
+        ]
+      }
+  register: eks_nodes_role
+
 - name: Create IAM Policy for EKS Cluster
   amazon.aws.iam_policy:
     policy_name: "{{ cluster_name }}-eks-policy"
@@ -30,10 +51,59 @@
         "Statement": [
           {
             "Effect": "Allow",
-            "Action": "*",
+            "Action": [
+              "ec2:CreateTags"
+            ],
+            "Resource": "arn:aws:ec2:*:*:instance/*",
+            "Condition": {
+              "ForAnyValue:StringLike": {
+                "aws:TagKeys": "kubernetes.io/cluster/*"
+              }
+            }
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "ec2:DescribeInstances",
+              "ec2:DescribeNetworkInterfaces",
+              "ec2:DescribeVpcs",
+              "ec2:DescribeDhcpOptions",
+              "ec2:DescribeAvailabilityZones",
+              "ec2:DescribeInstanceTopology",
+              "kms:DescribeKey"
+            ],
             "Resource": "*"
           }
         ]
       }
   ignore_errors: "{{ ansible_check_mode }}"
   register: eks_policy
+
+
+- name: Create IAM Policy for EKS Cluster Nodes
+  amazon.aws.iam_policy:
+    policy_name: "{{ cluster_name }}-eks-nodes-policy"
+    state: "present"
+    iam_type: "role"
+    iam_name: "{{ eks_nodes_role.iam_role.role_name }}"
+    policy_json: >
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "ec2:DescribeInstances",
+              "ec2:DescribeNetworkInterfaces",
+              "ec2:DescribeVpcs",
+              "ec2:DescribeDhcpOptions",
+              "ec2:DescribeAvailabilityZones",
+              "ec2:DescribeInstanceTopology",
+              "kms:DescribeKey"
+            ],
+            "Resource": "*"
+          }
+        ]
+      }
+  ignore_errors: "{{ ansible_check_mode }}"
+  register: eks_nodes_policy

@@ -29,10 +29,16 @@
       amazon.aws.ec2_vpc_route_table:
         vpc_id: "{{ vpcs.vpcs[0].id }}"
         state: "absent"
-    - name: Delete Security Group for EKS Cluster
-      amazon.aws.ec2_security_group:
-        name: "{{ cluster_name }}-eks-sg"
-        vpc_id: "{{ vpcs.vpcs[0].id }}"
+    - name: Delete EKS Node Group
+      community.aws.eks_nodegroup:
+        name: "{{ cluster_name }}-node-group"
+        cluster_name: "{{ cluster_name }}"
+        wait: true
+        state: "absent"
+    - name: Delete EKS Cluster
+      community.aws.eks_cluster:
+        name: "{{ cluster_name }}"
+        wait: true
         state: "absent"
     - name: Delete Subnets
       amazon.aws.ec2_vpc_subnet:
@@ -43,17 +49,19 @@
         region: "{{ aws_region }}"
         map_public: true
       with_items: "{{ public_subnets + private_subnets }}"
-    - name: Delete EKS Node Group
-      community.aws.eks_node_group:
-        name: "{{ cluster_name }}-node-group"
-        cluster_name: "{{ cluster_name }}"
-        wait: true
+    - name: Delete Security Group for EKS Cluster
+      amazon.aws.ec2_security_group:
+        name: "{{ cluster_name }}-eks-sg"
+        vpc_id: "{{ vpcs.vpcs[0].id }}"
         state: "absent"
-    - name: Delete EKS Cluster
-      community.aws.eks_cluster:
-        name: "{{ cluster_name }}"
-        wait: true
+    - name: Delete Route Table for Public Subnets
+      amazon.aws.ec2_vpc_route_table:
+        vpc_id: "{{ vpcs.vpcs[0].id }}"
         state: "absent"
+        region: "{{ aws_region }}"
+        lookup: tag
+        tags:
+          Name: "{{ cluster_name }}"
     - name: Delete VPC
       amazon.aws.ec2_vpc_net:
         vpc_id: "{{ vpcs.vpcs[0].id }}"
