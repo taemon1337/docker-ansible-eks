@@ -6,7 +6,7 @@ build:
 	docker build -t $(IMAGE):$(TAG) .
 
 run:
-	docker run -it --rm -v $(PWD):$(PWD) $(IMAGE):$(TAG) sh
+	docker run -it --rm -v $(PWD):$(PWD) -w $(PWD) --entrypoint=/bin/sh $(IMAGE):$(TAG) --
 
 terraform:
 	docker run -it --rm \
