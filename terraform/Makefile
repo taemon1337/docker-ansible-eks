@@ -1,0 +1,29 @@
+PWD := $(shell pwd)
+IMAGE ?= terraform
+TAG ?= latest
+
+build:
+	docker build -t $(IMAGE):$(TAG) .
+
+run:
+	docker run -it --rm -v $(PWD):$(PWD) $(IMAGE):$(TAG) sh
+
+terraform:
+	docker run -it --rm \
+		-v ~/.aws:/root/.aws \
+		-v $(PWD):$(PWD) -w $(PWD) $(IMAGE):$(TAG) $(MAKEFLAGS)
+
+plan:
+	docker run -it --rm \
+		-v ~/.aws:/root/.aws \
+		-v $(PWD):$(PWD) -w $(PWD) $(IMAGE):$(TAG) plan
+
+cluster:
+	docker run -it --rm \
+		-v ~/.aws:/root/.aws \
+		-v $(PWD):$(PWD) -w $(PWD) $(IMAGE):$(TAG) apply
+
+delete-cluster:
+	docker run -it --rm \
+		-v ~/.aws:/root/.aws \
+		-v $(PWD):$(PWD) -w $(PWD) $(IMAGE):$(TAG) destroy
