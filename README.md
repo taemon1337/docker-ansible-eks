@@ -1,31 +1,26 @@
-# Docker Ansible EKS Cluster
+# Provision an EKS cluster with full AWS resources
 
-Docker image for provisioning an EKS cluster with full AWS resources.
+This repository deploys EKS cluster with full AWS resources using Ansible and Terraform using only Docker.
 
-## Get Started
+## Prerequisites
 
-```bash
-# clone the repo
-git clone https://github.com/taemon1337/docker-ansible-eks.git
+- AWS Credentials
+- Docker
 
-# ensure docker is installed
-docker version
+## Ansible Playbook
 
-# build the ansible docker image
-make build
+1. Clone the repository
+2. Build the Docker image
+3. Run the Docker image
+4. Run the Ansible playbook
 
-# run the image and shell into it
-make run
+see [./ansible/README.md](./ansible/README.md) for details
 
-# run ansible from the image
-make ansible
+## Terraform
 
-# run eks-playbook in check mode
-make check
+1. Clone the repository
+2. Build the Docker image
+3. Run the Docker image
+4. Run the Terraform commands
 
-# create the eks cluster
-make cluster
-
-# delete the eks cluster
-make delete-cluster
-```
+see [./terraform/README.md](./terraform/README.md) for details
