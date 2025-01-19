@@ -13,6 +13,11 @@ terraform:
 		-v ~/.aws:/root/.aws \
 		-v $(PWD):$(PWD) -w $(PWD) $(IMAGE):$(TAG) $(MAKEFLAGS)
 
+init:
+	docker run -it --rm \
+		-v ~/.aws:/root/.aws \
+		-v $(PWD):$(PWD) -w $(PWD) $(IMAGE):$(TAG) init
+
 plan:
 	docker run -it --rm \
 		-v ~/.aws:/root/.aws \

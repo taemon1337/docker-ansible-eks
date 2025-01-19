@@ -7,10 +7,10 @@ terraform {
   }
 }
 
-resource "aws_eks_cluster" "demo" {
+resource "aws_eks_cluster" "eks_cluster" {
   name     = var.cluster_name
   version  = var.kubernetes_version
-  role_arn = aws_iam_role.demo-cluster.arn
+  role_arn = aws_iam_role.eks_cluster.arn
 
   vpc_config {
     subnet_ids = aws_subnet.demo.*.id
@@ -19,32 +19,31 @@ resource "aws_eks_cluster" "demo" {
   # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.
   # Otherwise, EKS will not be able to properly delete EKS managed EC2 infrastructure such as Security Groups.
   depends_on = [
-    aws_iam_role_policy_attachment.demo-AmazonEKSClusterPolicy,
-    aws_iam_role_policy_attachment.demo-AmazonEKSVPCResourceController,
+    aws_iam_role.eks_cluster,
+    aws_iam_role.eks_nodes_role,
+    aws_iam_policy.eks_policy,
+    aws_iam_policy.eks_nodes_policy
   ]
 }
 
-resource "aws_eks_node_group" "demo" {
-  cluster_name    = aws_eks_cluster.demo.name
+resource "aws_eks_node_group" "node_group" {
+  cluster_name    = aws_eks_cluster.eks_cluster.name
   node_group_name = "${var.cluster_name}-default"
-  node_role_arn   = aws_iam_role.demo-node.arn
+  node_role_arn   = aws_iam_role.eks_nodes_role.arn
   subnet_ids      = aws_subnet.demo.*.id
 
   scaling_config {
-    desired_size = var.workers_count
-    max_size     = local.azCount
-    min_size     = 1
+    desired_size = var.desired_size
+    max_size     = var.max_size
+    min_size     = var.min_size
   }
+
+  disk_size = var.disk_size
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
   # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
   depends_on = [
-    aws_iam_role_policy_attachment.demo-AmazonEKSWorkerNodePolicy,
-    aws_iam_role_policy_attachment.demo-AmazonEKS_CNI_Policy,
-    aws_iam_role_policy_attachment.demo-AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role.eks_nodes_role,
+    aws_iam_policy.eks_nodes_policy
   ]
-}
-
-data "aws_eks_cluster_auth" "demo" {
-  name = aws_eks_cluster.demo.name
 }
